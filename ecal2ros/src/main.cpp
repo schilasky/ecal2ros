@@ -31,38 +31,38 @@ class GatewayNode : public rclcpp::Node
 public:
   GatewayNode() : Node("ecal2ros")
   {
-    // pub <sensor_msgs::msg::NavSatFix> / sub <pb::NavSatFix>
+    // pub <sensor_msgs::msg::NavSatFix> / sub <pb::sensor_msgs::NavSatFix>
     pub_nav_ = this->create_publisher<sensor_msgs::msg::NavSatFix>("navsatfix_ros", 10);
-    sub_nav_ = eCAL::protobuf::CSubscriber<pb::NavSatFix>("navsatfix");
+    sub_nav_ = eCAL::protobuf::CSubscriber<pb::sensor_msgs::NavSatFix>("navsatfix");
     sub_nav_.AddReceiveCallback(std::bind(&GatewayNode::navsatfix_cb, this, std::placeholders::_2));
 
-    // <sensor_msgs::msg::Temperature> / sub <pb::Temperature>
+    // <sensor_msgs::msg::Temperature> / sub <pb::sensor_msgs::Temperature>
     pub_tmp_ = this->create_publisher<sensor_msgs::msg::Temperature>("temperature_ros", 10);
-    sub_tmp_ = eCAL::protobuf::CSubscriber<pb::Temperature>("temperature");
+    sub_tmp_ = eCAL::protobuf::CSubscriber<pb::sensor_msgs::Temperature>("temperature");
     sub_tmp_.AddReceiveCallback(std::bind(&GatewayNode::temperature_cb, this, std::placeholders::_2));
   }
 
 private:
-  void navsatfix_cb(const pb::NavSatFix& msg)
+  void navsatfix_cb(const pb::sensor_msgs::NavSatFix& msg)
   {
     // header
-    msg_tmp_.header.stamp.set__sec(msg.header().stamp().sec());
+    msg_tmp_.header.stamp.set__sec(msg.header().stamp().sec()); //-V807
     msg_tmp_.header.stamp.set__nanosec(msg.header().stamp().nanosec());
     msg_tmp_.header.set__frame_id(msg.header().frame_id());
 
     // status
     switch (msg.status().status())
     {
-    case pb::NavSatStatus::STATUS_FIX:       // unaugmented fix
+    case pb::sensor_msgs::NavSatStatus::STATUS_FIX:       // unaugmented fix
       msg_nav_.status.set__status(sensor_msgs::msg::NavSatStatus::STATUS_FIX);
       break;
-    case pb::NavSatStatus::STATUS_NO_FIX:    // unable to fix position
+    case pb::sensor_msgs::NavSatStatus::STATUS_NO_FIX:    // unable to fix position
       msg_nav_.status.set__status(sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX);
       break;
-    case pb::NavSatStatus::STATUS_SBAS_FIX:  // with satellite-based augmentation
+    case pb::sensor_msgs::NavSatStatus::STATUS_SBAS_FIX:  // with satellite-based augmentation
       msg_nav_.status.set__status(sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX);
       break;
-    case pb::NavSatStatus::STATUS_GBAS_FIX:  // with ground-based augmentation
+    case pb::sensor_msgs::NavSatStatus::STATUS_GBAS_FIX:  // with ground-based augmentation
       msg_nav_.status.set__status(sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX);
       break;
     }
@@ -83,10 +83,10 @@ private:
     pub_nav_->publish(msg_nav_);
   }
 
-  void temperature_cb(const pb::Temperature& msg)
+  void temperature_cb(const pb::sensor_msgs::Temperature& msg)
   {
     // header
-    msg_tmp_.header.stamp.set__sec(msg.header().stamp().sec());
+    msg_tmp_.header.stamp.set__sec(msg.header().stamp().sec()); //-V807
     msg_tmp_.header.stamp.set__nanosec(msg.header().stamp().nanosec());
     msg_tmp_.header.set__frame_id(msg.header().frame_id());
 
@@ -100,14 +100,14 @@ private:
     pub_tmp_->publish(msg_tmp_);
   }
 
-  // pub <sensor_msgs::msg::NavSatFix> / sub <pb::NavSatFix>
+  // pub <sensor_msgs::msg::NavSatFix> / sub <pb::sensor_msgs::NavSatFix>
   rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr    pub_nav_;
-  eCAL::protobuf::CSubscriber<pb::NavSatFix>                   sub_nav_;
+  eCAL::protobuf::CSubscriber<pb::sensor_msgs::NavSatFix>                   sub_nav_;
   sensor_msgs::msg::NavSatFix                                  msg_nav_;
 
-  // pub <sensor_msgs::msg::Temperature> / sub <pb::Temperature>
+  // pub <sensor_msgs::msg::Temperature> / sub <pb::sensor_msgs::Temperature>
   rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr  pub_tmp_;
-  eCAL::protobuf::CSubscriber<pb::Temperature>                 sub_tmp_;
+  eCAL::protobuf::CSubscriber<pb::sensor_msgs::Temperature>                 sub_tmp_;
   sensor_msgs::msg::Temperature                                msg_tmp_;
 };
 
