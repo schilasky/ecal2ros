@@ -65,6 +65,8 @@ private:
     case pb::sensor_msgs::NavSatStatus::STATUS_GBAS_FIX:  // with ground-based augmentation
       msg_nav_.status.set__status(sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX);
       break;
+    default:
+      break;
     }
 
     // latitude
